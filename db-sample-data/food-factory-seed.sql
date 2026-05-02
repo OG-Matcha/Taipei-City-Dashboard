@@ -17,7 +17,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ── 3. component_maps (circle layer for all factory points) ──────────────────
 INSERT INTO public.component_maps (index, title, type, source, size, icon, paint, property)
-VALUES (
+SELECT
   'food_factory_locations',
   '食品工廠',
   'circle',
@@ -26,6 +26,8 @@ VALUES (
   NULL,
   '{"circle-color":["match",["get","city"],"臺北市","#5b9fe8","新北市","#f59e0b","#6b8fa3"],"circle-opacity":0.85,"circle-stroke-width":1,"circle-stroke-color":"#ffffff","circle-stroke-opacity":0.6}',
   '[{"key":"name","name":"工廠名稱"},{"key":"city","name":"縣市"},{"key":"district","name":"行政區"},{"key":"address","name":"地址"}]'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.component_maps WHERE index = 'food_factory_locations'
 );
 
 -- ── 4. query_charts ───────────────────────────────────────────────────────────
