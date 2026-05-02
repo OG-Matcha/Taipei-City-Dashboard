@@ -25,7 +25,7 @@ VALUES
   (
     'food_factory_district', NULL,
     ARRAY(SELECT id FROM public.component_maps WHERE index = 'food_factory_locations'),
-    '{}',
+    '{"mode":"byParam","byParam":{"xParam":"district"}}',
     'static', NULL, 0, NULL,
     '臺北市政府衛生局 / 新北市政府衛生局',
     '雙北食品工廠行政區統計',
@@ -50,7 +50,7 @@ ORDER BY count DESC$SQL$,
   (
     'food_factory_district', NULL,
     ARRAY(SELECT id FROM public.component_maps WHERE index = 'food_factory_locations'),
-    '{}',
+    '{"mode":"byParam","byParam":{"xParam":"district"}}',
     'static', NULL, 0, NULL,
     '臺北市政府衛生局',
     '臺北市食品工廠行政區統計',

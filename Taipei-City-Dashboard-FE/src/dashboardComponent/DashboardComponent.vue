@@ -116,6 +116,7 @@ const toggleOn = computed({
 const mousePosition = ref({ x: null, y: null });
 const showTagTooltip = ref(false);
 
+
 // Parses time data into display format
 const dataTime = computed(() => {
 	if (props.config.time_from === "static") {

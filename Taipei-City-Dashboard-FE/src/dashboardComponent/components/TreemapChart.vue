@@ -94,7 +94,7 @@ const sum = computed(() => {
 	props.series[0].data.forEach(
 		(item) => (sum += item.y)
 	);
-	return Math.round(sum * 100) / 100;
+	return parseFloat(sum.toFixed(2));
 });
 
 const selectedIndex = ref(null);

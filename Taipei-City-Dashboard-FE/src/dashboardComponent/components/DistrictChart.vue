@@ -284,7 +284,7 @@ function handleDataSelection(index) {
   >
     <div class="districtchart-title">
       <h5>總合</h5>
-      <h6>{{ districtData.sum }} {{ chart_config.unit }}</h6>
+      <h6>{{ parseFloat(districtData.sum.toFixed(2)) }} {{ chart_config.unit }}</h6>
       <div class="districtchart-title-legend">
         <p>多</p>
         <div
