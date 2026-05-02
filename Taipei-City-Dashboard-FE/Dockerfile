@@ -4,9 +4,11 @@ FROM node:21-slim AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install dependencies using npm ci for consistency
-COPY package*.json ./
-RUN npm ci
+# Install dependencies; npm ci fails when package-lock.json is generated on a
+# different OS (e.g. Windows) because platform-specific optional deps differ.
+# Using npm install lets npm resolve the correct native binary for this platform.
+COPY package.json ./
+RUN npm install
 # test
 # Copy the rest of the application code
 COPY . .

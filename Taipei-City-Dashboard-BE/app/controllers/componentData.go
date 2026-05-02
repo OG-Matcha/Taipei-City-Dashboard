@@ -83,6 +83,10 @@ func GetComponentChartData(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": chartData})
+	} else if queryType == "static" {
+		// Data is loaded entirely in the frontend; return an empty array so
+		// chart_data is truthy and the component renders.
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": []interface{}{}})
 	}
 }
 

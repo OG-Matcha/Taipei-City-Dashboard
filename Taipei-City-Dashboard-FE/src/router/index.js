@@ -18,6 +18,7 @@ import MapView from "../views/MapView.vue";
 import ComponentView from "../views/ComponentView.vue";
 import ComponentInfoView from "../views/ComponentInfoView.vue";
 import EmbedView from "../views/EmbedView.vue";
+import SankeyView from "../views/SankeyView.vue";
 
 const routes = [
 	{
@@ -57,6 +58,11 @@ const routes = [
 	{
 		path: "/embed",
 		redirect: "/embed/0",
+	},
+	{
+		path: "/sankey",
+		name: "sankey",
+		component: SankeyView,
 	},
 	{
 		path: "/admin",
