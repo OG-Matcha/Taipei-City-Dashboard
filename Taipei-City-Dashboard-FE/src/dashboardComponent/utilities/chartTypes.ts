@@ -24,5 +24,4 @@ export const chartTypes: chartType = {
 	MapLegend: "地圖圖例", // V
 	TextUnitChart: "文字數值圖", // V
 	SankeyChart: "供應鏈桑基圖", // V
-	FoodFactoryChart: "食品工廠分布圖", // V
 };

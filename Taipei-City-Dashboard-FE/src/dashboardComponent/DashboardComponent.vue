@@ -29,7 +29,6 @@ import IconPercentChart from "./components/IconPercentChart.vue";
 import IndicatorChart from "./components/IndicatorChart.vue";
 import TextUnitChart from "./components/TextUnitChart.vue";
 import SankeyChart from "./components/SankeyChart.vue";
-import FoodFactoryChart from "./components/FoodFactoryChart.vue";
 
 import MapLegendSvg from "./assets/chart/MapLegend.svg";
 import DistrictChartSvg from "./assets/chart/DistrictChart.svg";
@@ -229,8 +228,6 @@ function returnChartComponent(name, svg) {
 		return svg ? TextUnitChartSvg : TextUnitChart;
 	case "SankeyChart":
 		return svg ? BarChartSvg : SankeyChart;
-	case "FoodFactoryChart":
-		return svg ? BarChartSvg : FoodFactoryChart;
 	default:
 		return svg ? MapLegendSvg : MapLegend;
 	}
