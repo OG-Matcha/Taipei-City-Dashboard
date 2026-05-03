@@ -811,7 +811,7 @@ function renderAIText(text) {
   font-size: 1.1rem;
   color: var(--color-text);
   line-height: 1.9;
-  :deep(p) { margin: 0 0 1rem; &:last-child { margin-bottom: 0; } }
+  :deep(p) { margin: 0 0 1rem; font-size: 1.1rem; &:last-child { margin-bottom: 0; } }
   :deep(strong) { color: var(--color-highlight); }
   :deep(.skai-heading) { color: var(--color-highlight); font-weight: 700; }
 }
