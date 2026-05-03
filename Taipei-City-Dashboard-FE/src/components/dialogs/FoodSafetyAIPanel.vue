@@ -134,6 +134,7 @@ function renderText(text) {
 		.replace(/&/g, "&amp;")
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;")
+		.replace(/【(.+?)】/g, '<span class="fsai-heading">【$1】</span>')
 		.replace(/\n\n+/g, "</p><p>")
 		.replace(/\n/g, "<br>")
 		.replace(/^/, "<p>")
@@ -343,6 +344,13 @@ function renderText(text) {
   }
 
   :deep(strong) { color: var(--color-highlight); }
+
+  :deep(.fsai-heading) {
+    color: var(--color-highlight);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
 }
 
 @keyframes spin {
