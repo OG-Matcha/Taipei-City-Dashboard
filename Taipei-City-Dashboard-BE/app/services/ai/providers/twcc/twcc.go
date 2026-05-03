@@ -177,6 +177,7 @@ func (m *TWCC) doRequest(ctx context.Context, body []byte, isStreaming bool) (*h
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-API-KEY", m.APIKey)
+	req.Header.Set("Authorization", "Bearer "+m.APIKey)
 
 	client := m.HTTPClient
 	if isStreaming { client = &http.Client{Timeout: 0} }
@@ -252,8 +253,6 @@ func (p *streamProcessor) processLine(ctx context.Context, line string) bool {
 func (p *streamProcessor) handleControlLine(ctx context.Context, line string) {
 	if !p.detectionConfirmed {
 		p.lineBuffer = append(p.lineBuffer, line)
-	} else if !p.isToolCalling {
-		p.streamingFunc(ctx, []byte(line))
 	}
 }
 
@@ -262,9 +261,6 @@ func (p *streamProcessor) handleDone(ctx context.Context, line string) {
 		p.isToolCalling = false
 		p.detectionConfirmed = true
 		p.flushBuffer(ctx)
-	}
-	if !p.isToolCalling {
-		p.streamingFunc(ctx, []byte(line))
 	}
 }
 
@@ -299,7 +295,7 @@ func (p *streamProcessor) processChunk(ctx context.Context, chunk *TWCCStreamRes
 	if chunk.PromptTokens > 0 || chunk.Usage != nil { p.lastUsage = chunk }
 
 	if !p.detectionConfirmed {
-		p.lineBuffer = append(p.lineBuffer, rawLine)
+		p.lineBuffer = append(p.lineBuffer, text)
 		return
 	}
 
@@ -307,7 +303,9 @@ func (p *streamProcessor) processChunk(ctx context.Context, chunk *TWCCStreamRes
 		p.accumulateTools(chunk)
 	} else {
 		p.flushBuffer(ctx)
-		p.streamingFunc(ctx, []byte(rawLine))
+		if text != "" {
+			p.streamingFunc(ctx, []byte(text))
+		}
 	}
 }
 
