@@ -128,6 +128,18 @@ function refresh() {
 	analysisText.value = "";
 	runAnalysis();
 }
+
+function renderText(text) {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/\n\n+/g, "</p><p>")
+		.replace(/\n/g, "<br>")
+		.replace(/^/, "<p>")
+		.replace(/$/, "</p>")
+		.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
 </script>
 
 <template>
@@ -175,10 +187,11 @@ function refresh() {
               <div class="fsai-spinner" />
               <p>AI 正在呼叫工具並分析資料，請稍候…</p>
             </div>
-            <pre
+            <div
               v-else
               class="fsai-content"
-            >{{ analysisText || "（無回應）" }}</pre>
+              v-html="renderText(analysisText || '（無回應）')"
+            />
           </div>
         </div>
       </div>
@@ -317,13 +330,18 @@ function refresh() {
 }
 
 .fsai-content {
-  white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--font-family);
-  font-size: var(--font-s);
+  font-size: 0.95rem;
   color: var(--color-text);
-  line-height: 1.7;
-  margin: 0;
+  line-height: 1.85;
+
+  p {
+    margin: 0 0 0.9rem;
+    &:last-child { margin-bottom: 0; }
+  }
+
+  strong { color: var(--color-highlight); }
 }
 
 @keyframes spin {

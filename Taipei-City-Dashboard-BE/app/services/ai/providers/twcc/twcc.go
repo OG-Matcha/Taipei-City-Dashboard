@@ -251,9 +251,7 @@ func (p *streamProcessor) processLine(ctx context.Context, line string) bool {
 }
 
 func (p *streamProcessor) handleControlLine(ctx context.Context, line string) {
-	if !p.detectionConfirmed {
-		p.lineBuffer = append(p.lineBuffer, line)
-	}
+	// SSE separator lines (\n\n) — do not buffer or forward
 }
 
 func (p *streamProcessor) handleDone(ctx context.Context, line string) {
