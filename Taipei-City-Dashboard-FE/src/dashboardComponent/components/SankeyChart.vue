@@ -1,7 +1,10 @@
 <!-- School Food Supply Chain Sankey Chart -->
 <script setup>
 import { computed, ref, watch } from "vue";
+import { useAuthStore } from "../../store/authStore";
 import sankeyData from "../../assets/data/sankey-school-food.json";
+
+const authStore = useAuthStore();
 
 // ── Dates extracted once at module load ──────────────────────────────────────
 const allDates = [
@@ -260,6 +263,103 @@ function nodeColor() {
 	if (selectedCity.value !== "全部") return CITY_COLOR[selectedCity.value] || FALLBACK_COLOR;
 	return "#6b8fa3";
 }
+
+// ── AI Analysis Panel ──────────────────────────────────────────────────────
+const showAIPanel = ref(false);
+const aiAnalyzing = ref(false);
+const aiText = ref("");
+
+function buildSankeyContext() {
+	const l = layout.value;
+	const cityLabel = selectedCity.value === "全部" ? "雙北市" : selectedCity.value;
+	const distLabel = selectedDistrict.value === "全部" ? "全部區域" : selectedDistrict.value;
+	const dateRange = `${allDates[startIdx.value]} 至 ${allDates[endIdx.value]}`;
+	const lines = [
+		`篩選條件：城市=${cityLabel}，區域=${distLabel}，層級=${selectedLayer.value}，日期範圍=${dateRange}`,
+	];
+	if (l.nodes0.length) {
+		lines.push("\n【上游原料供應商 Top 節點（依供餐次數）】");
+		l.nodes0.slice(0, 10).forEach((n) => lines.push(`  ${n.name}：${n.flow.toLocaleString()} 次`));
+	}
+	if (l.nodes1.length) {
+		lines.push("\n【中游供餐業者 Top 節點（依供餐次數）】");
+		l.nodes1.slice(0, 10).forEach((n) => lines.push(`  ${n.name}：${n.flow.toLocaleString()} 次`));
+	}
+	if (l.nodes2.length) {
+		lines.push("\n【下游學校 Top 節點（依供餐次數）】");
+		l.nodes2.slice(0, 10).forEach((n) => lines.push(`  ${n.name}：${n.flow.toLocaleString()} 次`));
+	}
+	return lines.join("\n");
+}
+
+async function runSankeyAnalysis() {
+	aiAnalyzing.value = true;
+	aiText.value = "";
+	const baseUrl = import.meta.env.VITE_API_URL || "/api/v1";
+	const context = buildSankeyContext();
+	try {
+		const response = await fetch(`${baseUrl}/ai/chat/twai`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${authStore.token || ""}`,
+			},
+			body: JSON.stringify({
+				stream: true,
+				messages: [
+					{
+						role: "system",
+						content:
+							"你是雙北學校供餐供應鏈分析助手。根據使用者提供的桑基圖當前顯示數據，以繁體中文輸出分析報告。報告格式固定如下，不可省略任何段落：\n\n【供應鏈概況】\n說明整體供應鏈規模，包含上中下游主要節點與供餐次數。\n\n【關鍵上游供應商】\n列出最重要的原料供應商，說明其在供應鏈中的影響範圍與重要性。\n\n【核心供餐業者】\n列出主要供餐業者，說明其服務規模及連結的下游學校數量。\n\n【集中度風險分析】\n分析供應鏈集中度，指出若某節點失效可能波及的學校範圍及潛在食安風險。\n\n【管理建議】\n針對供應鏈透明度與食安管理給出具體改善建議。\n\n最後一句綜合結論。",
+					},
+					{
+						role: "user",
+						content: `以下是目前桑基圖顯示的供應鏈數據，請分析並輸出報告：\n\n${context}`,
+					},
+				],
+				max_new_tokens: 1500,
+			}),
+		});
+		if (!response.ok) {
+			aiText.value = `分析失敗：${await response.text() || response.statusText}`;
+			return;
+		}
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder();
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			aiText.value += decoder.decode(value, { stream: true });
+		}
+	} catch (e) {
+		aiText.value = `錯誤：${e.message}`;
+	} finally {
+		aiAnalyzing.value = false;
+	}
+}
+
+function openAIPanel() {
+	showAIPanel.value = true;
+	if (!aiText.value && !aiAnalyzing.value) runSankeyAnalysis();
+}
+
+function refreshAIAnalysis() {
+	aiText.value = "";
+	runSankeyAnalysis();
+}
+
+function renderAIText(text) {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/【(.+?)】/g, '<span class="skai-heading">【$1】</span>')
+		.replace(/\n\n+/g, "</p><p>")
+		.replace(/\n/g, "<br>")
+		.replace(/^/, "<p>")
+		.replace(/$/, "</p>")
+		.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
 </script>
 
 <template>
@@ -327,8 +427,43 @@ function nodeColor() {
           <select v-model="selectedDistrict" class="sankey-select">
             <option v-for="d in districtOptions" :key="d" :value="d">{{ d === "全部" ? "全部區域" : d }}</option>
           </select>
+          <button class="skai-trigger-btn" title="AI 解讀此供應鏈圖" @click="openAIPanel">
+            <span class="material-icons-outlined" style="font-size:0.9rem;vertical-align:middle;">auto_awesome</span>
+            AI 解讀
+          </button>
         </div>
       </div>
+
+      <!-- AI Analysis Panel -->
+      <Teleport to="body">
+        <div v-if="showAIPanel" class="skai-overlay" @click.self="showAIPanel = false">
+          <div class="skai-panel">
+            <div class="skai-header">
+              <span class="material-icons-outlined">auto_awesome</span>
+              <h3>供應鏈 AI 分析報告</h3>
+              <div class="skai-header-actions">
+                <button :disabled="aiAnalyzing" title="重新分析" @click="refreshAIAnalysis">
+                  <span class="material-icons-outlined">refresh</span>
+                </button>
+                <button @click="showAIPanel = false">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </div>
+            </div>
+            <div class="skai-body">
+              <div v-if="aiAnalyzing && !aiText" class="skai-loading">
+                <div class="skai-spinner" />
+                <p>AI 正在分析供應鏈數據，請稍候…</p>
+              </div>
+              <div
+                v-else
+                class="skai-content"
+                v-html="renderAIText(aiText || '（無回應）')"
+              />
+            </div>
+          </div>
+        </div>
+      </Teleport>
 
       <!-- Date range slider -->
       <div class="date-slider">
@@ -579,6 +714,106 @@ function nodeColor() {
 
   span { display: flex; align-items: center; gap: 4px; }
   i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+}
+
+// ── AI Panel ─────────────────────────────────────────────────────────────────
+.skai-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--color-highlight, #5b9fe8);
+  background: transparent;
+  color: var(--color-highlight, #5b9fe8);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: background 0.15s;
+  &:hover { background: rgba(91,159,232,0.12); }
+}
+
+.skai-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skai-panel {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  width: min(720px, 90vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skai-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--color-border);
+  .material-icons-outlined:first-child { color: var(--color-highlight); }
+  h3 { flex: 1; margin: 0; font-size: var(--font-m); color: var(--color-text); }
+  &-actions {
+    display: flex;
+    gap: 0.25rem;
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-complement-text);
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      &:hover { background: var(--color-border); }
+      &:disabled { opacity: 0.4; cursor: default; }
+    }
+  }
+}
+
+.skai-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.2rem;
+}
+
+.skai-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  p { color: var(--color-complement-text); font-size: var(--font-s); }
+}
+
+.skai-spinner {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-highlight);
+  animation: skai-spin 0.7s linear infinite;
+}
+
+@keyframes skai-spin { to { transform: rotate(360deg); } }
+
+.skai-content {
+  word-break: break-word;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  line-height: 1.9;
+  :deep(p) { margin: 0 0 1rem; &:last-child { margin-bottom: 0; } }
+  :deep(strong) { color: var(--color-highlight); }
+  :deep(.skai-heading) { color: var(--color-highlight); font-weight: 700; }
 }
 
 // ── Table view ───────────────────────────────────────────────────────────────
