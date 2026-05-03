@@ -129,6 +129,52 @@ function refresh() {
 	runAnalysis();
 }
 
+const fabPos = ref({ right: 32, bottom: 32 });
+let dragging = false;
+let dragStart = { x: 0, y: 0, right: 0, bottom: 0 };
+
+function onFabMousedown(e) {
+	if (e.button !== 0) return;
+	dragging = true;
+	dragStart = {
+		x: e.clientX,
+		y: e.clientY,
+		right: fabPos.value.right,
+		bottom: fabPos.value.bottom,
+	};
+	e.preventDefault();
+	window.addEventListener("mousemove", onFabMousemove);
+	window.addEventListener("mouseup", onFabMouseup);
+}
+
+function onFabMousemove(e) {
+	if (!dragging) return;
+	const dx = e.clientX - dragStart.x;
+	const dy = e.clientY - dragStart.y;
+	fabPos.value = {
+		right: Math.max(8, dragStart.right - dx),
+		bottom: Math.max(8, dragStart.bottom - dy),
+	};
+}
+
+function onFabMouseup(e) {
+	dragging = false;
+	window.removeEventListener("mousemove", onFabMousemove);
+	window.removeEventListener("mouseup", onFabMouseup);
+	// suppress click if moved more than 5px
+	if (Math.abs(e.clientX - dragStart.x) > 5 || Math.abs(e.clientY - dragStart.y) > 5) {
+		window._fabDragged = true;
+	}
+}
+
+function onFabClick(e) {
+	if (window._fabDragged) {
+		window._fabDragged = false;
+		return;
+	}
+	openPanel();
+}
+
 function renderText(text) {
 	return text
 		.replace(/&/g, "&amp;")
@@ -145,11 +191,13 @@ function renderText(text) {
 
 <template>
   <template v-if="isFoodSafetyDashboard">
-    <!-- Floating trigger button -->
+    <!-- Floating trigger button (draggable) -->
     <button
       class="fsai-fab"
       title="AI 食安分析"
-      @click="openPanel"
+      :style="{ right: fabPos.right + 'px', bottom: fabPos.bottom + 'px' }"
+      @mousedown="onFabMousedown"
+      @click="onFabClick"
     >
       <span class="material-icons-outlined">auto_awesome</span>
       <span class="fsai-fab-label">AI 食安分析</span>
@@ -203,8 +251,6 @@ function renderText(text) {
 <style scoped lang="scss">
 .fsai-fab {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -213,12 +259,13 @@ function renderText(text) {
   color: #fff;
   border: none;
   border-radius: 2rem;
-  cursor: pointer;
+  cursor: grab;
   font-size: var(--font-s);
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 100;
   transition: transform 0.15s ease;
+  user-select: none;
 
   &:hover {
     transform: translateY(-2px);
@@ -348,8 +395,6 @@ function renderText(text) {
   :deep(.fsai-heading) {
     color: var(--color-highlight);
     font-weight: 700;
-    display: block;
-    margin-bottom: 0.3rem;
   }
 }
 
