@@ -78,7 +78,7 @@ async function runAnalysis() {
 					{
 						role: "system",
 						content:
-							"你是雙北食品安全分析助手。善用工具取得資料後，以繁體中文給出清楚的分析報告。報告須包含：1) 高風險區域點名，2) 抽驗不合格熱點，3) 風險因子解讀，4) 稽查資源配置建議。",
+							"你是雙北食品安全分析助手。請先呼叫工具取得資料，再以繁體中文輸出分析報告。報告格式固定如下，不可省略任何段落：\n\n【高風險區域點名】\n根據 RFSRAI 風險排行，列出前五名高風險行政區，說明其風險程度。\n\n【抽驗不合格熱點】\n列出不合格筆數最多的行政區，說明食安問題嚴重程度。\n\n【風險因子解讀】\n綜合 RFSRAI 指標與不合格數據，解讀各區風險成因。\n\n【稽查資源配置建議】\n依風險高低給出具體的稽查優先順序建議，分高風險區、不合格熱點、其他區域三層說明。\n\n最後一句話綜合結論。",
 					},
 					{
 						role: "user",
@@ -332,16 +332,17 @@ function renderText(text) {
 .fsai-content {
   word-break: break-word;
   font-family: var(--font-family);
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   color: var(--color-text);
-  line-height: 1.85;
+  line-height: 1.9;
 
-  p {
-    margin: 0 0 0.9rem;
+  :deep(p) {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
     &:last-child { margin-bottom: 0; }
   }
 
-  strong { color: var(--color-highlight); }
+  :deep(strong) { color: var(--color-highlight); }
 }
 
 @keyframes spin {
