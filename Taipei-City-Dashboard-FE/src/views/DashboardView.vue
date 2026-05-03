@@ -18,6 +18,7 @@ import { useAuthStore } from "../store/authStore";
 
 import MoreInfo from "../components/dialogs/MoreInfo.vue";
 import ReportIssue from "../components/dialogs/ReportIssue.vue";
+import FoodSafetyAIPanel from "../components/dialogs/FoodSafetyAIPanel.vue";
 
 const contentStore = useContentStore();
 const dialogStore = useDialogStore();
@@ -182,6 +183,7 @@ function handleMoreInfo(item) {
     />
     <MoreInfo />
     <ReportIssue />
+    <FoodSafetyAIPanel />
   </div>
   <!-- 3. If dashboard is still loading -->
   <div
