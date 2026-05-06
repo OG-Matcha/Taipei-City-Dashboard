@@ -24,6 +24,8 @@ INSERT INTO public.components (id, index, name) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ── contributors (team + codefest2026 + official) ────────────────────────────
+SELECT pg_catalog.setval('public.contributors_id_seq', (SELECT COALESCE(MAX(id), 0) FROM public.contributors), true);
+
 INSERT INTO public.contributors (user_id, user_name, image, link, identity, description, include, created_at, updated_at)
 SELECT 'og-matcha', '黃鉅燊', 'https://github.com/OG-Matcha.png', 'https://github.com/OG-Matcha', NULL, NULL, false, NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM public.contributors WHERE user_id = 'og-matcha');

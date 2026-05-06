@@ -540,6 +540,7 @@ function renderAIText(text) {
   flex-direction: column;
   gap: 2px;
   background: transparent;
+  overflow: visible; // override DashboardComponent's * { overflow: hidden }
 }
 
 // ── Controls ────────────────────────────────────────────────────────────────
@@ -550,6 +551,7 @@ function renderAIText(text) {
   gap: 0.5rem;
   padding: 0 0.5rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .layer-btn-group { display: flex; gap: 2px; }
@@ -819,13 +821,14 @@ function renderAIText(text) {
 // ── Table view ───────────────────────────────────────────────────────────────
 .supply-table-wrap {
   flex: 1;
+  overflow-x: auto;
   overflow-y: auto;
   padding: 0 0.5rem;
   min-height: 0;
 }
 
 .supply-table {
-  width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
 
@@ -838,6 +841,7 @@ function renderAIText(text) {
     padding: 6px 10px;
     text-align: left;
     border-bottom: 1px solid var(--color-border, #444);
+    white-space: nowrap;
   }
 
   td {
@@ -845,6 +849,7 @@ function renderAIText(text) {
     border-bottom: 1px solid rgba(255,255,255,0.05);
     color: var(--color-text, #ddd);
     vertical-align: middle;
+    white-space: nowrap;
   }
 
   tr:hover td { background: rgba(255,255,255,0.04); }
