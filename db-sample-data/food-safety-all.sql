@@ -43,6 +43,10 @@ SELECT 'kevensdreamland', '林楷鈞', 'https://github.com/KevensDreamLand.png',
 WHERE NOT EXISTS (SELECT 1 FROM public.contributors WHERE user_id = 'kevensdreamland');
 
 INSERT INTO public.contributors (user_id, user_name, image, link, identity, description, include, created_at, updated_at)
+SELECT 'baker-ku', '古謙紘', 'https://github.com/bakerlink10-spec.png', 'https://github.com/bakerlink10-spec', NULL, NULL, false, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM public.contributors WHERE user_id = 'baker-ku');
+
+INSERT INTO public.contributors (user_id, user_name, image, link, identity, description, include, created_at, updated_at)
 SELECT 'codefest2026', 'CoFest 2026 Spring', 'codefest.png', 'https://codefest.taipei/2026-spring/', NULL, NULL, false, NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM public.contributors WHERE user_id = 'codefest2026');
 
@@ -105,7 +109,7 @@ INSERT INTO public.query_charts (
   '本圖以桑基圖呈現雙北地區（臺北市、新北市）中小學及高中職學校的供餐供應鏈結構。上游為食材及調味料供應商，中游為各供餐業者，下游為學校。連結寬度代表供貨次數，顯示各供應商與供餐業者之間的合作密度，以及供餐業者服務學校的頻率。可依市縣篩選查看臺北市或新北市的供應鏈分布。',
   '適用於食品安全稽查、供應鏈風險評估及教育餐飲管理。透過視覺化供應鏈關係，可快速識別高風險供應商（供貨次數異常集中）、單一業者依賴風險，以及跨市供應商的分布情形，支援食安政策制定與應急追溯。',
   '{https://fatraceschool.k12ea.gov.tw/frontend/search.html}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'static', 'static', NULL, 'metrotaipei'
 ) ON CONFLICT DO NOTHING;
@@ -127,7 +131,7 @@ INSERT INTO public.query_charts (
   '統計臺北市與新北市各行政區的合法食品工廠登記數量，地圖顯示每座工廠的實際位置（藍色：臺北市，橘色：新北市）。',
   '了解雙北食品製造業的地理分布，協助食安稽查資源配置規劃，可與學校供餐供應鏈圖對照，識別風險集中區域。',
   '{https://data.gov.tw/dataset/121252,https://data.gov.tw/dataset/127936}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, count AS data
@@ -161,7 +165,7 @@ INSERT INTO public.query_charts (
   '統計臺北市各行政區的合法食品工廠登記數量，地圖顯示每座工廠的實際位置。',
   '了解臺北市食品製造業的地理分布，協助食安稽查資源配置規劃。',
   '{https://data.gov.tw/dataset/121252}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, count AS data
@@ -190,7 +194,7 @@ INSERT INTO public.query_charts (
   '統計雙北各行政區食品商家抽驗不合格筆數，圓圈大小代表不合格數量。',
   '識別食安風險集中的行政區，協助稽查資源優先配置。',
   '{https://imap.health.gov.taipei/App_Prog/Analysis1.aspx,https://fsmc.ntpc.gov.tw/DigitalMap/PublicWebsite}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, num AS data
@@ -226,7 +230,7 @@ INSERT INTO public.query_charts (
   '統計臺北市各行政區食品商家抽驗不合格筆數，圓圈大小代表不合格數量。',
   '識別臺北市食安風險集中的行政區，協助稽查資源優先配置。',
   '{https://imap.health.gov.taipei/App_Prog/Analysis1.aspx}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, num AS data
@@ -254,7 +258,7 @@ INSERT INTO public.query_charts (
   'RFSRAI（Regional Food Safety Risk Assessment Index）區域食品安全風險評估指標，數值 ×100 顯示。計算公式：RFSRAI = 0.45H + 0.3E + 0.25S − 0.05M。H 風險基礎值（權重 0.45）：各區食品抽驗標準差，離群值越高代表該區越不穩定。E 學生暴露量（權重 0.3）：各區學校數占雙北全區比例，學校越密集出事時受影響人數越多。S 物流風險（權重 0.25）：供應商集中度比例，集中度越高一旦廠商出問題全區皆受波及。M 管理扣分（權重 −0.05）：通過二級品管驗證之業者比例，自主管理越好整體風險越低。',
   '識別雙北高風險行政區，協助衛生局優先配置稽查資源，指數越高代表該區食品安全管理優先程度越高。',
   '{}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, score AS data
@@ -290,7 +294,7 @@ INSERT INTO public.query_charts (
   'RFSRAI（Regional Food Safety Risk Assessment Index）區域食品安全風險評估指標，數值 ×100 顯示。計算公式：RFSRAI = 0.45H + 0.3E + 0.25S − 0.05M。H 風險基礎值（權重 0.45）：各區食品抽驗標準差，離群值越高代表該區越不穩定。E 學生暴露量（權重 0.3）：各區學校數占雙北全區比例，學校越密集出事時受影響人數越多。S 物流風險（權重 0.25）：供應商集中度比例，集中度越高一旦廠商出問題全區皆受波及。M 管理扣分（權重 −0.05）：通過二級品管驗證之業者比例，自主管理越好整體風險越低。',
   '識別臺北市高風險行政區，協助衛生局優先配置稽查資源。',
   '{}',
-  '{og-matcha,beansamuel,yueyue14,kevensdreamland,codefest2026,doit,ntpc}',
+  '{og-matcha,beansamuel,yueyue14,kevensdreamland,baker-ku,codefest2026,doit,ntpc}',
   NOW(), NOW(),
   'two_d',
   $SQL$SELECT district AS x_axis, score AS data
